@@ -14,6 +14,7 @@ function App() {
     ws.onmessage = (event) => {
       alert(event.data)
     }
+
   },[])
 
   const sendMessage = () => {
