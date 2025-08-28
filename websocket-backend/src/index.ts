@@ -8,18 +8,30 @@ interface User {
 let allSockets: User[] = [];
 //event handler
 wss.on("connection",function(socket){
-    allSockets.push(socket);
-    socket.on("message",function(message){
-        const parsedMessage = JSON.parse(message);
+    socket.on("message",(message) =>{
+        const parsedMessage = JSON.parse(message as unknown as  string);
         if(parsedMessage.type === "join"){
+            console.log("user joined room: ", parsedMessage.payload.roomId);
             allSockets.push({
                 socket,
-                room: parsedMessage.payload.roomId
+                room: parsedMessage.payload.roomId,
             })
         }
+
+        if(parsedMessage.type === "chat"){
+            console.log("user sent message: ", parsedMessage.payload.message);
+            const currentUserRoom = allSockets.find(x => x.socket === socket)?.room;
+            allSockets.forEach(user => {
+                if(user.room === currentUserRoom){
+                    user.socket.send(parsedMessage.payload.message)
+                }
+            })
+        }
+
+
     });
 
-    socket.on("disconnect",()=>{
-        allSockets = allSockets.filter(s => s !== socket)
-    })
+    // socket.on("disconnect",()=>{
+    //     allSockets = allSockets.filter(s => s !== socket)
+    // })
 }) 
